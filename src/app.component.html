@@ -1,0 +1,286 @@
+<div class="flex flex-col h-screen bg-gray-50">
+  <!-- Header -->
+  <header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm z-10">
+    <div class="flex items-center gap-3">
+      <div class="bg-bili-pink text-white p-2 rounded-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      </div>
+      <div>
+        <h1 class="text-xl font-bold text-gray-800">BiliMind <span class="text-bili-pink">AI</span></h1>
+        <p class="text-xs text-gray-500">Video Knowledge Base Generator</p>
+      </div>
+    </div>
+    @if (view() === 'dashboard') {
+      <button (click)="resetApp()" class="text-sm text-gray-500 hover:text-bili-pink transition-colors font-medium">
+        Analyze Another Video
+      </button>
+    }
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 relative overflow-hidden">
+    
+    <!-- State 1: Input (Home) -->
+    @if (view() === 'home') {
+      <div class="absolute inset-0 flex flex-col items-center justify-center p-6 animate-fade-in">
+        <div class="bg-white p-8 rounded-2xl shadow-xl max-w-2xl w-full border border-gray-100">
+          <h2 class="text-2xl font-bold text-center mb-2 text-gray-800">Turn Video into Knowledge</h2>
+          <p class="text-center text-gray-500 mb-8">Paste a Bilibili link (Demo) or upload a file (Real Analysis) to start chatting.</p>
+
+          <!-- Input Tabs -->
+          <div class="flex gap-4 mb-6 border-b border-gray-100 pb-1">
+            <button 
+              class="px-4 py-2 text-sm font-medium transition-colors relative"
+              [class.text-bili-pink]="inputType() === 'url'"
+              [class.text-gray-500]="inputType() !== 'url'"
+              (click)="setInputType('url')">
+              Bilibili URL (Demo)
+              @if (inputType() === 'url') { <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-bili-pink"></div> }
+            </button>
+            <button 
+              class="px-4 py-2 text-sm font-medium transition-colors relative"
+              [class.text-bili-pink]="inputType() === 'file'"
+              [class.text-gray-500]="inputType() !== 'file'"
+              (click)="setInputType('file')">
+              File Upload (Real AI)
+              @if (inputType() === 'file') { <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-bili-pink"></div> }
+            </button>
+          </div>
+
+          <!-- URL Input -->
+          @if (inputType() === 'url') {
+            <div class="space-y-4">
+              <div class="relative">
+                <input 
+                  #urlInput
+                  type="text" 
+                  placeholder="https://www.bilibili.com/video/BV..." 
+                  class="w-full pl-4 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-transparent transition-all"
+                  (keyup.enter)="processUrl(urlInput.value)"
+                >
+              </div>
+              <div class="bg-blue-50 text-blue-700 text-xs p-3 rounded-lg flex gap-2 items-start">
+                <svg class="w-4 h-4 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <p>Try these sample videos for the best demo experience:</p>
+              </div>
+              <div class="flex gap-2 text-xs">
+                 <button (click)="urlInput.value='BV1FV411d7u7'; processUrl('BV1FV411d7u7')" class="bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded text-gray-600">Hou Lang</button>
+                 <button (click)="urlInput.value='BV1kY5XzrE6L'; processUrl('BV1kY5XzrE6L')" class="bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded text-gray-600">MCP Tutorial</button>
+              </div>
+              <button 
+                (click)="processUrl(urlInput.value)"
+                class="w-full py-3 bg-bili-pink hover:bg-pink-500 text-white font-semibold rounded-xl shadow-lg shadow-pink-200 transition-all transform active:scale-95 flex justify-center items-center gap-2">
+                Start Analysis
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
+              </button>
+            </div>
+          }
+
+          <!-- File Input -->
+          @if (inputType() === 'file') {
+            <div class="space-y-4">
+               <div class="text-center border-2 border-dashed border-gray-200 rounded-xl p-8 hover:bg-gray-50 transition-colors cursor-pointer relative group">
+                  <input type="file" accept="video/*,audio/*" class="absolute inset-0 opacity-0 cursor-pointer z-10" (change)="handleFileUpload($event)">
+                  <div class="mx-auto w-12 h-12 bg-pink-100 text-bili-pink rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  </div>
+                  <p class="text-sm font-medium text-gray-700">Click to upload Audio/Video</p>
+                  <p class="text-xs text-gray-400">Recommended: MP3 / M4A (Max 50MB)</p>
+               </div>
+
+               <!-- Helper Guide -->
+               <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 text-sm">
+                  <h3 class="font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+                     How to get the file?
+                  </h3>
+                  <p class="text-gray-600 mb-3 text-xs leading-relaxed">
+                     Due to browser security, we cannot download Bilibili videos directly. We recommend using the open-source tool <strong>BBDown</strong> to get the audio track.
+                  </p>
+                  <div class="bg-gray-800 rounded px-3 py-2 font-mono text-xs text-green-400 flex justify-between items-center group">
+                     <span>BBDown <span class="text-white">[URL]</span> --audio-only</span>
+                     <span class="text-gray-500 text-[10px]">Command Line</span>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-2">
+                     This command downloads only the audio track (small file size), which is perfect for AI analysis here.
+                  </p>
+               </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- State 2: Processing -->
+    @if (view() === 'processing') {
+      <div class="absolute inset-0 flex flex-col items-center justify-center bg-white z-20">
+        <div class="w-16 h-16 border-4 border-gray-200 border-t-bili-pink rounded-full animate-spin mb-6"></div>
+        <h3 class="text-xl font-semibold text-gray-800 mb-2">Analyzing Media Content</h3>
+        <p class="text-gray-500 animate-pulse">{{ statusMessage() }}</p>
+        @if (statusMessage().includes('Gemini')) {
+          <p class="text-xs text-gray-400 mt-2">This may take up to a minute for long audio...</p>
+        }
+      </div>
+    }
+
+    <!-- State 3: Dashboard -->
+    @if (view() === 'dashboard') {
+      <div class="flex h-full flex-col lg:flex-row">
+        
+        <!-- Left Panel: Video & Transcript -->
+        <div class="lg:w-1/2 h-1/2 lg:h-full flex flex-col border-b lg:border-b-0 lg:border-r border-gray-200 bg-white">
+          
+          <!-- Alert Banner -->
+          @if (isDemoMode()) {
+            <div class="bg-amber-50 border-b border-amber-100 px-4 py-2 flex items-center gap-2 text-xs text-amber-700">
+               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+               <span class="font-medium">Demo Mode:</span> Using simulated transcript. For real analysis, please download the video and use "File Upload".
+            </div>
+          }
+
+          <!-- Media Player Container -->
+          <div class="w-full aspect-video bg-black relative flex items-center justify-center">
+            @if (videoSourceType() === 'iframe') {
+               <!-- Bilibili Iframe -->
+               <iframe 
+                 [src]="safeVideoUrl()" 
+                 class="w-full h-full" 
+                 scrolling="no" 
+                 border="0" 
+                 frameborder="no" 
+                 framespacing="0" 
+                 referrerpolicy="no-referrer"
+                 allowfullscreen="true"
+                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share">
+               </iframe>
+            } 
+            
+            @if (videoSourceType() === 'file') {
+               <!-- Local Video Player -->
+               <video #videoPlayer controls class="w-full h-full" [src]="safeVideoUrl()"></video>
+            }
+            
+            @if (videoSourceType() === 'audio') {
+              <!-- Local Audio Player Visualization -->
+              <div class="w-full h-full flex flex-col items-center justify-center bg-gray-900 text-white gap-4">
+                 <div class="flex gap-2 items-end h-12">
+                   <div class="w-2 bg-bili-pink h-4 animate-pulse"></div>
+                   <div class="w-2 bg-bili-pink h-8 animate-pulse" style="animation-delay: 0.1s"></div>
+                   <div class="w-2 bg-bili-pink h-6 animate-pulse" style="animation-delay: 0.2s"></div>
+                   <div class="w-2 bg-bili-pink h-10 animate-pulse" style="animation-delay: 0.3s"></div>
+                   <div class="w-2 bg-bili-pink h-5 animate-pulse" style="animation-delay: 0.4s"></div>
+                 </div>
+                 <audio #videoPlayer controls class="w-3/4" [src]="safeVideoUrl()"></audio>
+                 <p class="text-sm text-gray-400">Audio Analysis Mode</p>
+              </div>
+           }
+          </div>
+
+          <!-- Transcript Section -->
+          <div class="flex-1 flex flex-col min-h-0 bg-white">
+            <div class="px-4 py-3 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+              <h3 class="font-semibold text-gray-700 flex items-center gap-2">
+                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                Transcript
+              </h3>
+              <span class="text-xs text-gray-400 font-mono">{{ transcriptSegments().length }} segments</span>
+            </div>
+            <div class="overflow-y-auto p-4 space-y-3 flex-1">
+              @if (transcriptSegments().length === 0) {
+                 <div class="flex items-center justify-center h-full text-gray-400 text-sm">
+                   No speech detected or transcript unavailable.
+                 </div>
+              }
+              @for (segment of transcriptSegments(); track segment.time) {
+                <div class="flex gap-3 hover:bg-gray-50 p-2 rounded-lg transition-colors group cursor-pointer" (click)="seekVideo(segment.seconds)">
+                  <span class="text-xs font-mono text-bili-pink bg-pink-50 px-2 py-1 rounded h-fit shrink-0 group-hover:bg-bili-pink group-hover:text-white transition-colors">
+                    {{ segment.time }}
+                  </span>
+                  <p class="text-sm text-gray-600 leading-relaxed">{{ segment.text }}</p>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Panel: Chat Interface -->
+        <div class="lg:w-1/2 h-1/2 lg:h-full flex flex-col bg-gray-50">
+          <!-- Chat Header -->
+          <div class="bg-white border-b border-gray-200 px-4 py-3 shadow-sm">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5c3.313 0 6-2.687 6-6Z"/><path d="M12 12a3 3 0 1 0 3-3"/></svg>
+              </div>
+              <div>
+                <h3 class="font-semibold text-gray-800">Knowledge Assistant</h3>
+                <p class="text-xs text-green-600 flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                  Gemini Flash 2.5 Active
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Messages Area -->
+          <div #chatContainer class="flex-1 overflow-y-auto p-4 space-y-6">
+            @if (messages().length === 0) {
+              <div class="h-full flex flex-col items-center justify-center text-gray-400 space-y-4">
+                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                  <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+                </div>
+                <p>Ask a question about the video content!</p>
+                <div class="grid grid-cols-1 gap-2 w-full max-w-sm">
+                   <button (click)="handleUserMessage('Summarize this video')" class="text-xs bg-white border border-gray-200 py-2 px-4 rounded-full hover:border-bili-pink hover:text-bili-pink transition-colors">"Summarize this video"</button>
+                   <button (click)="handleUserMessage('What is the main message?')" class="text-xs bg-white border border-gray-200 py-2 px-4 rounded-full hover:border-bili-pink hover:text-bili-pink transition-colors">"What is the main message?"</button>
+                </div>
+              </div>
+            }
+            
+            @for (msg of messages(); track msg.id) {
+              <div class="flex flex-col w-full animate-fade-in-up">
+                <div [class]="msg.sender === 'user' ? 'user-bubble' : 'ai-bubble'" class="chat-bubble shadow-sm">
+                  @if (msg.sender === 'ai') {
+                    <div [innerHTML]="formatAiResponse(msg.text)"></div>
+                  } @else {
+                    {{ msg.text }}
+                  }
+                </div>
+                <span class="text-[10px] text-gray-400 mt-1 px-1" [class.text-right]="msg.sender === 'user'">
+                  {{ msg.sender === 'user' ? 'You' : 'BiliMind' }}
+                </span>
+              </div>
+            }
+
+            @if (isTyping()) {
+              <div class="flex items-center gap-1 pl-2">
+                <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
+                <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></span>
+                <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
+              </div>
+            }
+          </div>
+
+          <!-- Input Area -->
+          <div class="bg-white p-4 border-t border-gray-200">
+            <div class="flex gap-2 items-end bg-gray-50 border border-gray-200 rounded-2xl p-2 focus-within:ring-2 focus-within:ring-pink-100 focus-within:border-pink-300 transition-all">
+              <textarea 
+                #chatInput
+                rows="1"
+                placeholder="Ask about the video..." 
+                class="flex-1 bg-transparent border-none focus:ring-0 resize-none max-h-32 py-2 px-2 text-sm"
+                (keyup.enter)="!isTyping() && handleUserMessage(chatInput.value); chatInput.value = ''"
+                (input)="autoResize($event.target)"
+              ></textarea>
+              <button 
+                [disabled]="isTyping()"
+                (click)="handleUserMessage(chatInput.value); chatInput.value = ''"
+                class="p-2 bg-bili-pink text-white rounded-xl hover:bg-pink-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </main>
+</div>

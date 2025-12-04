@@ -1,0 +1,5 @@
+{
+  "name": "BiliMind - Video Knowledge Base",
+  "description": "Convert Bilibili videos into an intelligent knowledge base using Gemini. Ask questions and find answers in long videos instantly.",
+  "requestFramePermissions": []
+}
